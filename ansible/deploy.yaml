@@ -1,0 +1,91 @@
+- hosts: prod  # Section of inventory.yaml containing target servers
+  become: yes
+  vars_files:
+    - vault.yaml  # Reference to ansible vault file
+  vars:
+    docker_compose_dest_path: /opt/project
+    nginx_config_path: "/etc/nginx/conf.d"
+
+  pre_tasks:
+    - name: Add proxy config to apt.conf
+      ansible.builtin.blockinfile:
+        path: /etc/apt/apt.conf.d/proxy.conf
+        create: yes
+        block: |
+          Acquire::http::Proxy "{{ proxy_url }}";
+          Acquire::https::Proxy "{{ proxy_url }}";
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        owner: root
+        group: root
+        mode: '0644'
+    
+    - name: Add docker GPG apt Key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        force: true
+      environment:
+        http_proxy: "{{ proxy_url }}"
+        https_proxy: "{{ proxy_url }}"
+    
+    - name: Add docker Repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+        state: present
+    
+    - name: Update apt cache after adding docker repository
+      ansible.builtin.apt:
+        update_cache: yes
+    
+    - name: Install docker and compose
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-compose-plugin
+        state: present
+    
+    - name: Ensure docker service is enabled and started
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+  tasks:
+    - name: Ensure the existence of the compose dest directory
+      ansible.builtin.file:
+        path: '{{ docker_compose_dest_path }}'
+        state: directory
+    
+    - name: Copy proxy conf used in compose process
+      template:
+        src: '{{ reverse_proxy_conf_src_path }}/{{ reverse_proxy_conf_name }}'
+        dest: '{{ docker_compose_dest_path }}/{{ reverse_proxy_conf_name }}'
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Template Jinja2 docker compose file
+      template:
+        src: '{{ docker_compose_src_path }}/{{ docker_compose_name }}'
+        dest: '{{ docker_compose_dest_path }}/{{ docker_compose_name }}'
+        mode: '0644'
+    
+    - name: Tear down existing services
+      community.docker.docker_compose_v2:
+        project_src: '{{ docker_compose_dest_path }}'
+        files:
+          - '{{ docker_compose_name }}'
+        state: absent
+
+    - name: Create and start services
+      community.docker.docker_compose_v2:
+        project_src: '{{ docker_compose_dest_path }}'
+        files:
+          - '{{ docker_compose_name }}'
+        pull: always
+        recreate: always
+        state: present
+      environment:
+        http_proxy: "{{ proxy_url }}"
+        https_proxy: "{{ proxy_url }}"

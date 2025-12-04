@@ -1,0 +1,53 @@
+name: Deploy front- & backend
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+    
+      - name: Install SSH agent
+        run: |
+          sudo apt-get update
+          which ssh-agent || sudo apt-get install openssh-client -y
+          eval "$(ssh-agent -s)"
+          echo "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}" >> $GITHUB_ENV
+          echo "SSH_AGENT_PID=${SSH_AGENT_PID}" >> $GITHUB_ENV
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-add ~/.ssh/id_rsa <<< "${{ secrets.SSH_KEY_PASSPHRASE }}"
+      
+      - name: Copy known_hosts
+        run: cp ./ansible/known_hosts ~/.ssh/known_hosts
+
+      - name: Create Vault pass File
+        run: |
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/.vault_pass.txt
+          chmod 600 /tmp/.vault_pass.txt
+
+      - name: Run Ansible Playbook
+        env:
+          ANSIBLE_SSH_COMMON_ARGS: "-o UserKnownHostsFile=ansible/known_hosts"
+        run: |
+          ansible-playbook -i ./ansible/inventory.yaml ./ansible/deploy.yaml --vault-password-file /tmp/.vault_pass.txt
+
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/.vault_pass.txt

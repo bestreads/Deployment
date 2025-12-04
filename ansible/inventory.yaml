@@ -1,0 +1,15 @@
+all:
+  children:
+    prod:
+      hosts:
+        167.86.94.57:
+      vars:
+        ansible_user: root
+        protocol: https://
+        hostname: bestreads.byte-flow.de
+        docker_registry_url: ghcr.io/bestreads
+        docker_compose_src_path: ../docker/
+        docker_compose_name: compose.yaml.j2
+        db_name: bestreads_db
+        api_base_path: /api
+        debug_level: info
