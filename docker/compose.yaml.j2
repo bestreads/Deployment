@@ -6,7 +6,6 @@ services:
       - ./{{ reverse_proxy_conf_name }}:{{ nginx_config_path }}/{{ reverse_proxy_conf_name }}:ro  # :ro is read-only
     restart: unless-stopped
     depends_on:
-      - keycloak
       - frontend
       - backend
     ports:
@@ -20,8 +19,6 @@ services:
     container_name: frontend
     image: {{ docker_registry_url }}/frontend:latest
     restart: unless-stopped
-    depends_on:
-      - keycloak
     expose:
       - 80
     networks:
@@ -32,7 +29,6 @@ services:
     image: {{ docker_registry_url }}/backend:latest
     restart: unless-stopped
     depends_on:
-      - keycloak
       - database
     expose:
       - 8080
