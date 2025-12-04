@@ -16,8 +16,8 @@ jobs:
       
       - name: Install Ansible
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ansible
+          pip3 install --upgrade "ansible-core==2.18.2"
+          ansible --version
     
       - name: Install SSH agent
         run: |
@@ -43,6 +43,10 @@ jobs:
         run: |
           printf "%s" "$ANSIBLE_VAULT_PASSWORD" > /tmp/.vault_pass.txt
           chmod 600 /tmp/.vault_pass.txt
+      
+      - name: Install Ansible requirements
+        run: |
+          ansible-galaxy collection install -r ./ansible/requirements.yaml
 
       - name: Run Ansible Playbook
         env:
