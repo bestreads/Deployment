@@ -38,8 +38,10 @@ jobs:
         run: cp ./ansible/known_hosts ~/.ssh/known_hosts
 
       - name: Create Vault pass File
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/.vault_pass.txt
+          printf "%s" "$ANSIBLE_VAULT_PASSWORD" > /tmp/.vault_pass.txt
           chmod 600 /tmp/.vault_pass.txt
 
       - name: Run Ansible Playbook
