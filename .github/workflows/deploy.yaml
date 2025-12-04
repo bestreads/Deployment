@@ -43,17 +43,6 @@ jobs:
         run: |
           printf "%s" "$ANSIBLE_VAULT_PASSWORD" > /tmp/.vault_pass.txt
           chmod 600 /tmp/.vault_pass.txt
-
-      - name: Debug (MD5 Check)
-        env:
-          PW_CHECK: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
-        run: |
-          echo "--- DEBUG START ---"
-          # 1. Ist das Secret überhaupt da?
-          echo "Länge des Secrets: ${#PW_CHECK}"
-          echo -n "$PW_CHECK" | md5sum
-          
-          echo "--- DEBUG END ---"
       
       - name: Install Ansible requirements
         run: |
