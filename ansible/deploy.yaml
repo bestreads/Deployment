@@ -1,7 +1,6 @@
 - hosts: prod  # Section of inventory.yaml containing target servers
   become: yes
-  vars_files:
-    - vault.yaml  # Reference to ansible vault file
+  vars_files: vault.yaml
   vars:
     docker_compose_dest_path: /opt/project
     nginx_config_path: "/etc/nginx/conf.d"
