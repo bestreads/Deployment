@@ -7,27 +7,12 @@
     nginx_config_path: "/etc/nginx/conf.d"
 
   pre_tasks:
-    - name: Add proxy config to apt.conf
-      ansible.builtin.blockinfile:
-        path: /etc/apt/apt.conf.d/proxy.conf
-        create: yes
-        block: |
-          Acquire::http::Proxy "{{ proxy_url }}";
-          Acquire::https::Proxy "{{ proxy_url }}";
-        marker: "# {mark} ANSIBLE MANAGED BLOCK"
-        owner: root
-        group: root
-        mode: '0644'
-    
     - name: Add docker GPG apt Key
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/debian/gpg
         dest: /etc/apt/keyrings/docker.asc
         mode: '0644'
         force: true
-      environment:
-        http_proxy: "{{ proxy_url }}"
-        https_proxy: "{{ proxy_url }}"
     
     - name: Add docker Repository
       ansible.builtin.apt_repository:
@@ -86,6 +71,3 @@
         pull: always
         recreate: always
         state: present
-      environment:
-        http_proxy: "{{ proxy_url }}"
-        https_proxy: "{{ proxy_url }}"
