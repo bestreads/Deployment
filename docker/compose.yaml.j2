@@ -66,7 +66,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`{{ hostname }}`) && PathPrefix(`{{ api_base_path }}`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
 
   database:
