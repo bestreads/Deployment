@@ -24,6 +24,7 @@ services:
       - "80:80"
       - "443:443"
     networks:
+      - proxy_egress
       - frontend_net
       - api_net
   
