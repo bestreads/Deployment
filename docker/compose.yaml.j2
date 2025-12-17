@@ -1,13 +1,28 @@
 services:
   reverse-proxy:
     container_name: reverse-proxy
-    image: nginx:1.29
+    image: traefik:3.6
     volumes:
-      - ./{{ reverse_proxy_conf_name }}:{{ nginx_config_path }}/{{ reverse_proxy_conf_name }}:ro  # :ro is read-only
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik-certs/acme.json:/letsecrypt/acme.json
     restart: unless-stopped
-    depends_on:
-      - frontend
-      - backend
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # Entrypoints for HTTP and HTTPS
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Global HTTP -> HTTPS redirect
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # Let's Encrypt configuration
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email={{ admin_email }}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsecrypt/acme.json"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tls.stores.default.defaultgeneratedcert.resolver=myresolver"
+      - "traefik.tls.stores.default.defaultgeneratedcert.domain.main={{ hostname }}"
     ports:
       - "80:80"
       - "443:443"
@@ -23,6 +38,12 @@ services:
       - 80
     networks:
       - frontend_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`{{ hostname }}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
   
   backend:
     container_name: backend
@@ -45,6 +66,12 @@ services:
     networks:
       - api_net
       - backend_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`{{ hostname }}`) && PathPrefix(`{{ api_base_path }}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
 
   database:
     container_name: database

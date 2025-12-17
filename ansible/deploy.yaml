@@ -3,7 +3,6 @@
   vars_files: vault.yaml
   vars:
     docker_compose_dest_path: /opt/project
-    nginx_config_path: "/etc/nginx/conf.d"
 
   pre_tasks:
     - name: Add docker GPG apt Key
@@ -40,15 +39,20 @@
       ansible.builtin.file:
         path: '{{ docker_compose_dest_path }}'
         state: directory
-    
-    - name: Copy proxy conf used in compose process
-      template:
-        src: '{{ reverse_proxy_conf_src_path }}/{{ reverse_proxy_conf_name }}'
-        dest: '{{ docker_compose_dest_path }}/{{ reverse_proxy_conf_name }}'
-        owner: root
-        group: root
-        mode: '0644'
 
+    - name: Create Traefik certs directory
+      ansible.builtin.file:
+        path: '{{ docker_compose_dest_path }}/traefik-certs'
+        state: directory
+        mode: '0755'
+
+    - name: Ensure acme.json exists with correct permissions
+      ansible.builtin.copy:
+        content: ""
+        dest: '{{ docker_compose_dest_path }}/traefik-certs/acme.json'
+        force: no  # Do not overwrite if it already exists
+        mode: '0600'
+    
     - name: Template Jinja2 docker compose file
       template:
         src: '{{ docker_compose_src_path }}/{{ docker_compose_name }}'

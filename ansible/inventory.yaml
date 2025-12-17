@@ -10,8 +10,6 @@ all:
         docker_registry_url: ghcr.io/bestreads
         docker_compose_src_path: ../docker/
         docker_compose_name: compose.yaml.j2
-        reverse_proxy_conf_src_path: ../config/
-        reverse_proxy_conf_name: app.conf
         db_name: bestreads_db
         api_base_path: /api
         debug_level: info
