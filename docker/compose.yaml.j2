@@ -4,9 +4,10 @@ services:
     image: traefik:3.6
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik-certs/acme.json:/letsecrypt/acme.json
+      - ./traefik-certs/acme.json:/letsencrypt/acme.json
     restart: unless-stopped
     command:
+      - "--api.insecure=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       # Entrypoints for HTTP and HTTPS
@@ -18,7 +19,7 @@ services:
       # Let's Encrypt configuration
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email={{ admin_email }}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsecrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
@@ -85,6 +86,12 @@ services:
       - backend_net
 
 networks:
+  # Reverse-Proxy <-> Internet
+  proxy_egress:
+    name: proxy_egress
+    driver: bridge
+    internal: false
+
   # Reverse-Proxy <-> Frontend
   frontend_net:
     name: frontend_net
