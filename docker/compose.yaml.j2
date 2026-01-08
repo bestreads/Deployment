@@ -63,6 +63,7 @@ services:
       - DB_SSL_MODE=false
     networks:
       - api_net
+      - egress_net
       - backend_net
     labels:
       - "traefik.enable=true"
@@ -104,6 +105,12 @@ networks:
     name: api_net
     driver: bridge
     internal: true
+  
+  # API -> Internet
+  egress_net:
+    name: egress_net
+    driver: bridge
+    internal: false
 
   # Backend services <-> Database
   backend_net:
