@@ -63,6 +63,7 @@ services:
       - DB_USERNAME={{ db_username }}
       - DB_PASSWORD={{ db_password }}
       - DB_NAME={{ db_name }}
+      - DATA_PATH="."
       - DB_SSL_MODE=false
     networks:
       - api_net
@@ -75,7 +76,7 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
     volumes:
-      - backend-data:/app/store
+      - backend-data:/app
 
   database:
     container_name: database
