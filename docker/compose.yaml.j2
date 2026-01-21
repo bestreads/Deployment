@@ -64,6 +64,7 @@ services:
       - DB_PASSWORD={{ db_password }}
       - DB_NAME={{ db_name }}
       - DB_SSL_MODE=false
+      - DATA_PATH="."
     networks:
       - api_net
       - egress_net
