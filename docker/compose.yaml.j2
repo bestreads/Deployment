@@ -74,6 +74,8 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
+    volumes:
+      - backend-data:/app/store
 
   database:
     container_name: database
@@ -123,3 +125,4 @@ networks:
 
 volumes:
   postgres-data:
+  backend-data:
