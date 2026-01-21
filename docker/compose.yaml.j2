@@ -75,7 +75,7 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
     volumes:
-      - backend-data:/app/store:rw
+      - backend-data:/app:rw
 
   database:
     container_name: database
