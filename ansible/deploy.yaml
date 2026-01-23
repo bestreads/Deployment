@@ -3,6 +3,7 @@
   vars_files: vault.yaml
   vars:
     docker_compose_dest_path: /opt/project
+    docker_user: dockeruser  # Name of the new user
 
   pre_tasks:
     - name: Add docker GPG apt Key
@@ -39,6 +40,19 @@
       ansible.builtin.file:
         path: '{{ docker_compose_dest_path }}'
         state: directory
+
+    - name: Create a new non-privileged user for Docker
+      ansible.builtin.user:
+        name: '{{ docker_user }}'
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Add user to the Docker group
+      ansible.builtin.user:
+        name: '{{ docker_user }}'
+        group: docker
+        append: yes
 
     - name: Create Traefik certs directory
       ansible.builtin.file:
