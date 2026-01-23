@@ -2,7 +2,7 @@
   become: yes
   vars_files: vault.yaml
   vars:
-    docker_compose_dest_path: /opt/project
+    docker_compose_dest_path: /home/dockeruser/
     docker_user: dockeruser  # Name of the new user
 
   pre_tasks:
@@ -89,3 +89,5 @@
         pull: always
         recreate: always
         state: present
+      become: yes
+      become_user: '{{ docker_user }}'  # Run this task as the new user
