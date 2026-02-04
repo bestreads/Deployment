@@ -5,7 +5,7 @@ all:
         167.86.94.57:
       vars:
         ansible_user: root
-        api_protocol: https
+        api_protocol: "https://"
         hostname: bestreads.byte-flow.de
         docker_registry_url: ghcr.io/bestreads
         docker_compose_src_path: ../docker/
