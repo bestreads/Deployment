@@ -72,6 +72,7 @@
         src: '{{ docker_compose_src_path }}/{{ docker_compose_name }}'
         dest: '{{ docker_compose_dest_path }}/{{ docker_compose_name }}'
         mode: '0644'
+        force: true
     
     - name: Tear down existing services
       community.docker.docker_compose_v2:
