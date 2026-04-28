@@ -80,6 +80,7 @@ services:
       - DB_NAME={{ db_name }}
       - DB_SSL_MODE=false
       - DATA_PATH=/app/store
+      - OPEN_LIBRARY_REQUEST_EMAIL={{ open_library_request_email }}
     networks:
       - api_net
       - egress_net
