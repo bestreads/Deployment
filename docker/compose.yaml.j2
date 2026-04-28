@@ -27,6 +27,21 @@ services:
       - proxy_egress
       - frontend_net
       - api_net
+
+  csc:
+    container_name: csc
+    image: codeberg.org/lucaschmitz/canasta-score-counter:latest
+    restart: unless-stopped
+    expose:
+      - 80
+    networks:
+      - frontend_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.csc.rule=Host(`{{ csc_hostname }}`)"
+      - "traefik.http.routers.csc.entrypoints=websecure"
+      - "traefik.http.routers.csc.tls.certresolver=myresolver"
+      - "traefik.http.services.csc.loadbalancer.server.port=80"
   
   frontend:
     container_name: frontend
