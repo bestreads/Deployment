@@ -82,6 +82,14 @@
         state: absent
       ignore_errors: true
 
+    - name: Log in to Codeberg registry
+      community.docker.docker_login:
+        registry_url: codeberg.org
+        username: "{{ codeberg_username }}"
+        password: "{{ codeberg_password }}"
+      become: yes
+      become_user: '{{ docker_user }}'
+
     - name: Create and start services
       community.docker.docker_compose_v2:
         project_src: '{{ docker_compose_dest_path }}'
