@@ -8,6 +8,7 @@ all:
         api_protocol: "https"
         hostname: bestreads.byte-flow.de
         csc_hostname: csc.byte-flow.de
+        ai_hostname: ai.byte-flow.de
         docker_registry_url: ghcr.io/bestreads
         docker_compose_src_path: ../docker/
         docker_compose_name: compose.yaml.j2
