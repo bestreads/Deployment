@@ -58,6 +58,7 @@ services:
       - egress_net
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=frontend_net"
       - "traefik.http.routers.open-webui.rule=Host(`{{ ai_hostname }}`)"
       - "traefik.http.routers.open-webui.entrypoints=websecure"
       - "traefik.http.routers.open-webui.tls.certresolver=myresolver"
@@ -109,6 +110,7 @@ services:
       - backend_net
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=api_net"
       - "traefik.http.routers.backend.rule=Host(`{{ hostname }}`) && PathPrefix(`{{ api_base_path }}`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
